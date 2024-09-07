@@ -4,6 +4,10 @@
 
 void dump_data(uint8_t *data, uint16_t size)
 {
+  if (data == NULL && size == 0) {
+    printf("EMPTY\r\n");
+    return;
+  }
   for (int i =0;i <size;i++) {
     printf("%02X ", data[i]);
   }
@@ -22,10 +26,44 @@ int main(void)
   }
   
   add_to_buf(test_data_eight, 8);
+  if (!check_cyclic(0, 8)) {
+    return 0;
+  }
   dump_data(my_cyclic_buf, MAX_BUF);
+
   add_to_buf(test_data, 5);
+  if (!check_cyclic(3, 10)) {
+    return 0;
+  }
   dump_data(my_cyclic_buf, MAX_BUF);
   add_to_buf(test_data_eight, 8);
   dump_data(my_cyclic_buf, MAX_BUF);
+
+  // read all bytes one by one
+  while(available_bytes() != 0) {
+    printf("%02X ", read_byte());
+  }
+  printf("\r\n");
+  if (available_bytes() == 0) {
+    printf("buf is empty\r\n");
+    if (!check_cyclic(3, 0)) {
+      return 0;
+    }
+  }
+
+  // add new data into buffer
+  add_to_buf(test_data, 3);
+  if (!check_cyclic(3, 3)) {
+    return 0;
+  }
+  dump_data(my_cyclic_buf, MAX_BUF);
+  add_to_buf(test_data_eight, 5);
+  if (!check_cyclic(3, 8)) {
+    return 0;
+  }
+  dump_data(my_cyclic_buf, MAX_BUF);
+
+  uint8_t *ret = read_bytes(8);
+  dump_data(ret, 8);
   return 1;
 }
